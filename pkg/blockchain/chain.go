@@ -1,15 +1,22 @@
 package blockchain
 
+import "fmt"
+
 type Chain struct {
 	Blocks []*Block
 }
 
-func (c *Chain) ChainBlock(data string) {
-	lastBlock := c.Blocks[len(c.Blocks)-1]
-	newblock := CreateBlock(data, lastBlock.Hash)
-	c.Blocks = append(c.Blocks, newblock)
+func InitChain() (*Chain, error) {
+	block, err := Genesis()
+	return &Chain{[]*Block{block}}, err
 }
 
-func InitChain() *Chain {
-	return &Chain{[]*Block{Genesis()}}
+func (c *Chain) ChainBlock(data string) {
+	lastBlock := c.Blocks[len(c.Blocks)-1]
+	newblock, err := CreateBlock(data, lastBlock.Hash)
+	if err != nil {
+		fmt.Print(err)
+	} else {
+		c.Blocks = append(c.Blocks, newblock)
+	}
 }
