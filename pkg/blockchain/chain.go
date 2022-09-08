@@ -3,6 +3,7 @@ package blockchain
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/avvvet/oxygen/pkg/kv"
 	"go.uber.org/zap"
@@ -31,7 +32,7 @@ func InitChain() (*Chain, error) {
 		}
 		b, _ := json.Marshal(block)
 
-		err = ledger.Upsert(block.Hash[:], b)
+		err = ledger.Upsert([]byte(strconv.Itoa(block.BlockHeight)), b)
 		if err != nil {
 			logger.Sugar().Fatal("unable to store data")
 		}
@@ -56,7 +57,7 @@ func (c *Chain) ChainBlock(data string) {
 		fmt.Print(err)
 	} else {
 		b, _ := json.Marshal(newblock)
-		err = c.Ledger.Upsert(newblock.Hash[:], b)
+		err = c.Ledger.Upsert([]byte(strconv.Itoa(newblock.BlockHeight)), b)
 		if err != nil {
 			logger.Sugar().Fatal("unable to store data")
 		}
