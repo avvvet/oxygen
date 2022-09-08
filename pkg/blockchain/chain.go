@@ -1,22 +1,65 @@
 package blockchain
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/avvvet/oxygen/pkg/kv"
+	"go.uber.org/zap"
+)
+
+var (
+	logger, _ = zap.NewDevelopment()
+)
 
 type Chain struct {
-	Blocks []*Block
+	Ledger    *kv.Ledger
+	LastBlock *Block
 }
 
 func InitChain() (*Chain, error) {
-	block, err := Genesis()
-	return &Chain{[]*Block{block}}, err
+	ledger, err := kv.NewLedger()
+	if err != nil {
+		logger.Sugar().Fatal("unable to initialize global state db.")
+	}
+
+	iter := ledger.Db.NewIterator(nil, nil)
+	if !iter.Last() {
+		block, err := Genesis()
+		if err != nil {
+			logger.Sugar().Fatal("unable to create genesis block.")
+		}
+		b, _ := json.Marshal(block)
+
+		err = ledger.Upsert(block.Hash[:], b)
+		if err != nil {
+			logger.Sugar().Fatal("unable to store data")
+		}
+		iter.Release()
+		return &Chain{ledger, block}, err
+	}
+
+	lastblock := &Block{}
+	err = json.Unmarshal(iter.Value(), lastblock)
+	if err != nil {
+		logger.Sugar().Fatal("unable to get block from store")
+	}
+	iter.Release()
+	return &Chain{ledger, lastblock}, err
 }
 
 func (c *Chain) ChainBlock(data string) {
-	lastBlock := c.Blocks[len(c.Blocks)-1]
+	lastBlock := c.LastBlock
 	newblock, err := CreateBlock(data, lastBlock.Hash)
+	newblock.BlockHeight = lastBlock.BlockHeight + 1
 	if err != nil {
 		fmt.Print(err)
 	} else {
-		c.Blocks = append(c.Blocks, newblock)
+		b, _ := json.Marshal(newblock)
+		err = c.Ledger.Upsert(newblock.Hash[:], b)
+		if err != nil {
+			logger.Sugar().Fatal("unable to store data")
+		}
+		c.LastBlock = newblock
 	}
 }

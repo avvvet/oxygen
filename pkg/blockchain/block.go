@@ -10,15 +10,16 @@ import (
 )
 
 type Block struct {
-	Hash       [32]byte
-	Data       []byte
-	PrevHash   [32]byte
-	Nonce      int
-	Difficulty int
+	Hash        [32]byte
+	Data        []byte
+	PrevHash    [32]byte
+	Nonce       int
+	BlockHeight int
+	Difficulty  int
 }
 
 func CreateBlock(data string, prevHash [32]byte) (*Block, error) {
-	block := &Block{[32]byte{}, []byte(data), prevHash, 0, Difficulty}
+	block := &Block{[32]byte{}, []byte(data), prevHash, 0, 0, Difficulty}
 	pow := NewPow(block)
 	nonce, hash := pow.SignBlock()
 	block.Hash = hash
