@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Block struct {
+	Timestamp   int64
 	Hash        [32]byte
 	Data        []byte
 	PrevHash    [32]byte
@@ -19,7 +21,7 @@ type Block struct {
 }
 
 func CreateBlock(data string, prevHash [32]byte) (*Block, error) {
-	block := &Block{[32]byte{}, []byte(data), prevHash, 0, 0, Difficulty}
+	block := &Block{time.Now().Unix(), [32]byte{}, []byte(data), prevHash, 0, 0, Difficulty}
 	pow := NewPow(block)
 	nonce, hash := pow.SignBlock()
 	block.Hash = hash
