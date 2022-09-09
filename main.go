@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/avvvet/oxygen/pkg/blockchain"
 	"go.uber.org/zap"
@@ -20,7 +21,7 @@ func main() {
 	}
 	defer chain.Ledger.Db.Close()
 
-	for i := 1; i < 10000; i++ {
+	for i := 1; i < 10; i++ {
 		chain.ChainBlock(`transaction {} ` + strconv.Itoa(i))
 	}
 
@@ -37,6 +38,7 @@ func main() {
 			}
 
 			fmt.Printf("############## BlockHeight %v ############# \n", i)
+			fmt.Printf("Timestamp : %s \n", time.Unix(block.Timestamp, 0).Format(time.RFC3339))
 			fmt.Printf("Block Hash: %x\n", block.Hash)
 			fmt.Printf("Data: %s\n", block.Data)
 			fmt.Printf("Previous Hash: %x\n", block.PrevHash)
