@@ -14,14 +14,25 @@ type Block struct {
 	Timestamp   int64
 	Hash        [32]byte
 	Data        []byte
+	Transaction []*Transaction
 	PrevHash    [32]byte
 	Nonce       int
 	BlockHeight int
 	Difficulty  int
 }
 
-func CreateBlock(data string, prevHash [32]byte) (*Block, error) {
-	block := &Block{time.Now().Unix(), [32]byte{}, []byte(data), prevHash, 0, 0, Difficulty}
+func CreateBlock(data string, txs []*Transaction, prevHash [32]byte) (*Block, error) {
+	block := &Block{
+		time.Now().Unix(),
+		[32]byte{},
+		[]byte(data),
+		txs,
+		prevHash,
+		0,
+		0,
+		Difficulty,
+	}
+
 	pow := NewPow(block)
 	nonce, hash := pow.SignBlock()
 	block.Hash = hash
@@ -42,7 +53,7 @@ func (b *Block) IsBlockValid(nonce int) bool {
 	return hashString[:Difficulty] == zeros
 }
 
-func Genesis() (*Block, error) {
-	block, err := CreateBlock("genesis adam's block ", [32]byte{})
+func Genesis(tx *Transaction) (*Block, error) {
+	block, err := CreateBlock("genesis adam's block ", []*Transaction{tx}, [32]byte{})
 	return block, err
 }

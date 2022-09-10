@@ -1,44 +1,32 @@
-=============== Sep 8, 2022 (EAT) ===============
-10:06:15.352678 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-10:06:15.457813 db@open opening
-10:06:15.460414 version@stat F·[] S·0B[] Sc·[]
-10:06:15.492408 db@janitor F·2 G·0
-10:06:15.492579 db@open done T·34.608549ms
-10:06:57.468395 db@close closing
-10:06:57.468564 db@close done T·157.842µs
-=============== Sep 9, 2022 (EAT) ===============
-07:32:20.481143 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-07:32:20.539479 version@stat F·[] S·0B[] Sc·[]
-07:32:20.539535 db@open opening
-07:32:20.539661 journal@recovery F·1
-07:32:20.540539 journal@recovery recovering @1
-07:32:20.755411 memdb@flush created L0@2 N·10000 S·1MiB "0,v1":"9999,v10000"
-07:32:20.757062 version@stat F·[1] S·1MiB[1MiB] Sc·[0.25]
-07:32:20.858652 db@janitor F·3 G·0
-07:32:20.858716 db@open done T·319.138366ms
-07:32:24.340933 db@close closing
-07:32:24.341584 db@close done T·642.963µs
-=============== Sep 9, 2022 (EAT) ===============
-07:40:26.049647 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-07:40:26.049860 version@stat F·[1] S·1MiB[1MiB] Sc·[0.25]
-07:40:26.049872 db@open opening
-07:40:26.049915 journal@recovery F·1
-07:40:26.050393 journal@recovery recovering @3
-07:40:26.095941 memdb@flush created L0@5 N·9 S·1KiB "10000,v10002":"10008,v10010"
-07:40:26.096588 version@stat F·[2] S·1MiB[1MiB] Sc·[0.50]
-07:40:26.198890 db@janitor F·4 G·0
-07:40:26.199062 db@open done T·149.174155ms
-07:40:29.846031 db@close closing
-07:40:29.846256 db@close done T·211.656µs
-=============== Sep 9, 2022 (EAT) ===============
-07:42:39.576336 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-07:42:39.576542 version@stat F·[2] S·1MiB[1MiB] Sc·[0.50]
-07:42:39.576555 db@open opening
-07:42:39.576606 journal@recovery F·1
-07:42:39.577010 journal@recovery recovering @6
-07:42:39.702025 memdb@flush created L0@8 N·9 S·1KiB "10000,v10012":"10008,v10020"
-07:42:39.703583 version@stat F·[3] S·1MiB[1MiB] Sc·[0.75]
-07:42:39.805383 db@janitor F·5 G·0
-07:42:39.805543 db@open done T·228.940529ms
-07:42:42.609685 db@close closing
-07:42:42.609929 db@close done T·230.665µs
+=============== Sep 11, 2022 (EAT) ===============
+01:47:34.862230 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+01:47:35.011142 db@open opening
+01:47:35.015697 version@stat F·[] S·0B[] Sc·[]
+01:47:35.045810 db@janitor F·2 G·0
+01:47:35.046047 db@open done T·34.72659ms
+01:47:35.094533 db@close closing
+01:47:35.094636 db@close done T·100.769µs
+=============== Sep 11, 2022 (EAT) ===============
+01:47:39.318799 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+01:47:39.319010 version@stat F·[] S·0B[] Sc·[]
+01:47:39.319021 db@open opening
+01:47:39.319064 journal@recovery F·1
+01:47:39.319505 journal@recovery recovering @1
+01:47:39.456688 memdb@flush created L0@2 N·4 S·1KiB "0,v1":"3,v4"
+01:47:39.458492 version@stat F·[1] S·1KiB[1KiB] Sc·[0.25]
+01:47:39.560380 db@janitor F·3 G·0
+01:47:39.560529 db@open done T·241.460427ms
+01:47:39.587903 db@close closing
+01:47:39.589130 db@close done T·1.20362ms
+=============== Sep 11, 2022 (EAT) ===============
+01:47:42.166134 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+01:47:42.166364 version@stat F·[1] S·1KiB[1KiB] Sc·[0.25]
+01:47:42.166377 db@open opening
+01:47:42.166427 journal@recovery F·1
+01:47:42.166817 journal@recovery recovering @3
+01:47:42.289678 memdb@flush created L0@5 N·3 S·1KiB "4,v6":"6,v8"
+01:47:42.291016 version@stat F·[2] S·2KiB[2KiB] Sc·[0.50]
+01:47:42.393139 db@janitor F·4 G·0
+01:47:42.393247 db@open done T·226.848268ms
+01:47:42.445309 db@close closing
+01:47:42.445432 db@close done T·112.81µs

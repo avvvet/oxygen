@@ -15,15 +15,23 @@ var (
 )
 
 func main() {
-	chain, err := blockchain.InitChain()
+	chain, err := blockchain.InitChain("yellow")
 	if err != nil {
 		fmt.Print(err)
 	}
 	defer chain.Ledger.Db.Close()
 
-	for i := 1; i < 10; i++ {
-		chain.ChainBlock(`transaction {} ` + strconv.Itoa(i))
-	}
+	tx := blockchain.NewTX("yellow", "GREEN", 400, chain)
+	chain.ChainBlock(`data {} `+strconv.Itoa(1), []*blockchain.Transaction{tx})
+
+	tx2 := blockchain.NewTX("yellow", "GREEN", 200, chain)
+	chain.ChainBlock(`data {} `+strconv.Itoa(2), []*blockchain.Transaction{tx2})
+
+	tx3 := blockchain.NewTX("GREEN", "BLUE", 550, chain)
+	chain.ChainBlock(`data {} `+strconv.Itoa(2), []*blockchain.Transaction{tx3})
+	// for i := 1; i < 10; i++ {
+	// 	chain.ChainBlock(`data {} `+strconv.Itoa(i), []*blockchain.Transaction{tx})
+	// }
 
 	var i = 0
 	for {
@@ -41,6 +49,7 @@ func main() {
 			fmt.Printf("Timestamp : %s \n", time.Unix(block.Timestamp, 0).Format(time.RFC3339))
 			fmt.Printf("Block Hash: %x\n", block.Hash)
 			fmt.Printf("Data: %s\n", block.Data)
+			fmt.Printf("Transaction ID: %x Inputs %+v  Outputs %+v\n", block.Transaction[0].ID, block.Transaction[0].Inputs, block.Transaction[0].Outputs)
 			fmt.Printf("Previous Hash: %x\n", block.PrevHash)
 			fmt.Printf("Difficulty: %v\n", block.Difficulty)
 			fmt.Printf("Nonce: %v\n", block.Nonce)
