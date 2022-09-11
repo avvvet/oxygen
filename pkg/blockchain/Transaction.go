@@ -111,3 +111,12 @@ func NewTX(from, to string, amount int, c *Chain) *Transaction {
 
 	return &tx
 }
+
+func (tx *Transaction) HashTx() [32]byte {
+	b, err := json.Marshal(tx)
+	if err != nil {
+		logger.Sugar().Fatal("transaction encoding error")
+	}
+
+	return sha256.Sum256(b)
+}

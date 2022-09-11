@@ -50,6 +50,7 @@ func main() {
 			fmt.Printf("Block Hash: %x\n", block.Hash)
 			fmt.Printf("Data: %s\n", block.Data)
 			fmt.Printf("Transaction ID: %x Inputs %+v  Outputs %+v\n", block.Transaction[0].ID, block.Transaction[0].Inputs, block.Transaction[0].Outputs)
+			fmt.Printf("Merkle root: %x\n", block.MerkleRoot)
 			fmt.Printf("Previous Hash: %x\n", block.PrevHash)
 			fmt.Printf("Difficulty: %v\n", block.Difficulty)
 			fmt.Printf("Nonce: %v\n", block.Nonce)

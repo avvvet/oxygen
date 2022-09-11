@@ -15,6 +15,7 @@ type Block struct {
 	Hash        [32]byte
 	Data        []byte
 	Transaction []*Transaction
+	MerkleRoot  []byte
 	PrevHash    [32]byte
 	Nonce       int
 	BlockHeight int
@@ -27,6 +28,7 @@ func CreateBlock(data string, txs []*Transaction, prevHash [32]byte) (*Block, er
 		[32]byte{},
 		[]byte(data),
 		txs,
+		[]byte{},
 		prevHash,
 		0,
 		0,
@@ -37,6 +39,7 @@ func CreateBlock(data string, txs []*Transaction, prevHash [32]byte) (*Block, er
 	nonce, hash := pow.SignBlock()
 	block.Hash = hash
 	block.Nonce = nonce
+	block.MerkleRoot = GenerateMerkleRoot(txs)
 
 	if block.IsBlockValid(nonce) {
 		return block, nil
