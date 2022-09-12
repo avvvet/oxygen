@@ -64,7 +64,7 @@ func (out *TxOutput) CanUnlock(data string) bool {
 	return out.PubKey == data
 }
 
-func NewTX(from, to string, amount int, c *Chain) *Transaction {
+func (c *Chain) NewTransaction(from, to string, amount int) *Transaction {
 	var inputs []TxInput
 	var outputs []TxOutput
 

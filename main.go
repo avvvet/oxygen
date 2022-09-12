@@ -21,13 +21,13 @@ func main() {
 	}
 	defer chain.Ledger.Db.Close()
 
-	tx := blockchain.NewTX("yellow", "GREEN", 400, chain)
+	tx := chain.NewTransaction("yellow", "GREEN", 400)
 	chain.ChainBlock(`data {} `+strconv.Itoa(1), []*blockchain.Transaction{tx})
 
-	tx2 := blockchain.NewTX("yellow", "GREEN", 200, chain)
+	tx2 := chain.NewTransaction("yellow", "GREEN", 200)
 	chain.ChainBlock(`data {} `+strconv.Itoa(2), []*blockchain.Transaction{tx2})
 
-	tx3 := blockchain.NewTX("GREEN", "BLUE", 550, chain)
+	tx3 := chain.NewTransaction("GREEN", "BLUE", 550)
 	chain.ChainBlock(`data {} `+strconv.Itoa(2), []*blockchain.Transaction{tx3})
 	// for i := 1; i < 10; i++ {
 	// 	chain.ChainBlock(`data {} `+strconv.Itoa(i), []*blockchain.Transaction{tx})
