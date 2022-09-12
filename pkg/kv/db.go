@@ -8,8 +8,8 @@ type Ledger struct {
 	Db *leveldb.DB
 }
 
-func NewLedger() (*Ledger, error) {
-	db, err := leveldb.OpenFile("./ledger/store", nil)
+func NewLedger(path string) (*Ledger, error) {
+	db, err := leveldb.OpenFile(path, nil)
 	if err != nil {
 		return nil, err
 	}

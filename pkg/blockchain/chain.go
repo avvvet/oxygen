@@ -20,9 +20,9 @@ type Chain struct {
 }
 
 func InitChain(address string) (*Chain, error) {
-	ledger, err := kv.NewLedger()
+	ledger, err := kv.NewLedger("./ledger/store")
 	if err != nil {
-		logger.Sugar().Fatal("unable to initialize global state db.")
+		logger.Sugar().Fatal("unable to initialize ledger.")
 	}
 
 	iter := ledger.Db.NewIterator(nil, nil)
