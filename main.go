@@ -30,9 +30,9 @@ func main() {
 	tx3 := chain.NewTransaction("GREEN", "BLUE", 550)
 	chain.ChainBlock(`data {} `+strconv.Itoa(2), []*blockchain.Transaction{tx3})
 
-	for i := 1; i < 10; i++ {
-		chain.ChainBlock(`data {} `+strconv.Itoa(i), []*blockchain.Transaction{tx})
-	}
+	// for i := 1; i < 10; i++ {
+	// 	chain.ChainBlock(`data {} `+strconv.Itoa(i), []*blockchain.Transaction{tx})
+	// }
 
 	var i = 0
 	for {
