@@ -19,7 +19,7 @@ type Chain struct {
 	LastBlock *Block
 }
 
-func InitChain(address string) (*Chain, error) {
+func InitChain(txOutput *TxOutput) (*Chain, error) {
 	ledger, err := kv.NewLedger("./ledger/store")
 	if err != nil {
 		logger.Sugar().Fatal("unable to initialize ledger.")
@@ -27,7 +27,7 @@ func InitChain(address string) (*Chain, error) {
 
 	iter := ledger.Db.NewIterator(nil, nil)
 	if !iter.Last() {
-		tx := NatureTx(address, "genesis nature token")
+		tx := NatureTx(txOutput, "genesis nature token")
 		block, err := Genesis(tx)
 		if err != nil {
 			logger.Sugar().Fatal("unable to create genesis block.")
@@ -85,7 +85,7 @@ func (c *Chain) GetUTXO(address string) ([]UTXO, int) {
 
 		for _, tx := range block.Transaction {
 			for txOutputIndex, txOutput := range tx.Outputs {
-				if txOutput.CanUnlock(address) {
+				if txOutput.IsTokenOwner(address) {
 					/*
 					  txoutput found , check if it is not spent
 					  send this tx id , and check if it is not used/ref in any input transactions
@@ -104,7 +104,7 @@ func (c *Chain) GetUTXO(address string) ([]UTXO, int) {
 	return utxo, total_utxo
 }
 
-func (c *Chain) isSpent(address string, txid []byte, index int) bool {
+func (c *Chain) isSpent(address string, txid []byte, txOutputIndex int) bool {
 	var i = 0
 	for {
 		rawBlock, err := c.Ledger.Get([]byte(strconv.Itoa(i)))
@@ -118,13 +118,13 @@ func (c *Chain) isSpent(address string, txid []byte, index int) bool {
 			logger.Sugar().Fatal("unable to get block from store")
 		}
 
-		for txOutputIndex, tx := range block.Transaction {
+		for _, tx := range block.Transaction {
 			for _, txInput := range tx.Inputs {
-				if txInput.CanUnlock(address) {
-					if bytes.Equal(txid, txInput.ID) && txOutputIndex == index {
-						return true
-					}
+
+				if bytes.Equal(txid, txInput.ID) && txInput.OutputIndex == txOutputIndex {
+					return true
 				}
+
 			}
 		}
 		i++

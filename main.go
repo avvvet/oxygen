@@ -1,12 +1,20 @@
 package main
 
 import (
+	"bytes"
+	"crypto/ecdsa"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io"
+	"math/big"
 	"strconv"
 	"time"
 
 	"github.com/avvvet/oxygen/pkg/blockchain"
+	"github.com/avvvet/oxygen/pkg/wallet"
 	"go.uber.org/zap"
 )
 
@@ -15,20 +23,75 @@ var (
 )
 
 func main() {
-	chain, err := blockchain.InitChain("yellow")
+	// Example: this will give us a 32 byte output
+	randomString, err := GenerateRandomString(32)
+	if err != nil {
+		// Serve an appropriately vague error to the
+		// user, but log the details internally.
+		panic(err)
+	}
+
+	//temp create wallet address and sign the first genesis transaction output
+	adamWallet := wallet.NewWallet()
+	eveWallet := wallet.NewWallet()
+
+	senderPK := encode(adamWallet.PublicKey)
+	receiverPK := encode(eveWallet.PublicKey)
+
+	natureRawTx := &wallet.RawTx{
+		SenderPublicKey:       senderPK,
+		SenderOxygenAddress:   adamWallet.OxygenAddress,
+		SenderRandomHash:      sha256.Sum256([]byte(randomString)),
+		ReceiverPublicKey:     senderPK,
+		ReceiverOxygenAddress: adamWallet.OxygenAddress,
+		Token:                 900,
+	}
+
+	txout := &blockchain.TxOutput{
+		RawTx:     natureRawTx,
+		Signature: natureRawTx.Sign(adamWallet.PrivateKey),
+	}
+
+	chain, err := blockchain.InitChain(txout)
 	if err != nil {
 		fmt.Print(err)
 	}
 	defer chain.Ledger.Db.Close()
 
-	tx := chain.NewTransaction("yellow", "GREEN", 400)
-	chain.ChainBlock(`data {} `+strconv.Itoa(1), []*blockchain.Transaction{tx})
+	rawTx1 := &wallet.RawTx{
+		SenderPublicKey:       senderPK,
+		SenderOxygenAddress:   adamWallet.OxygenAddress,
+		SenderRandomHash:      sha256.Sum256([]byte(randomString)),
+		Token:                 400,
+		ReceiverPublicKey:     receiverPK,
+		ReceiverOxygenAddress: eveWallet.OxygenAddress,
+	}
 
-	tx2 := chain.NewTransaction("yellow", "GREEN", 200)
-	chain.ChainBlock(`data {} `+strconv.Itoa(2), []*blockchain.Transaction{tx2})
+	txout1 := &blockchain.TxOutput{
+		RawTx:     rawTx1,
+		Signature: rawTx1.Sign(adamWallet.PrivateKey),
+	}
+	tx1 := chain.NewTransaction(txout1)
+	chain.ChainBlock(`data {} `+strconv.Itoa(1), []*blockchain.Transaction{tx1})
 
-	tx3 := chain.NewTransaction("GREEN", "BLUE", 550)
-	chain.ChainBlock(`data {} `+strconv.Itoa(2), []*blockchain.Transaction{tx3})
+	rawTx2 := &wallet.RawTx{
+		SenderPublicKey:       senderPK,
+		SenderOxygenAddress:   adamWallet.OxygenAddress,
+		SenderRandomHash:      sha256.Sum256([]byte(randomString)),
+		Token:                 490,
+		ReceiverPublicKey:     receiverPK,
+		ReceiverOxygenAddress: eveWallet.OxygenAddress,
+	}
+
+	txout2 := &blockchain.TxOutput{
+		RawTx:     rawTx2,
+		Signature: rawTx2.Sign(adamWallet.PrivateKey),
+	}
+	tx2 := chain.NewTransaction(txout2)
+	chain.ChainBlock(`data {} `+strconv.Itoa(1), []*blockchain.Transaction{tx2})
+
+	// tx3 := chain.NewTransaction("GREEN", "BLUE", 550)
+	// chain.ChainBlock(`data {} `+strconv.Itoa(2), []*blockchain.Transaction{tx3})
 
 	// for i := 1; i < 10; i++ {
 	// 	chain.ChainBlock(`data {} `+strconv.Itoa(i), []*blockchain.Transaction{tx})
@@ -84,4 +147,42 @@ func main() {
 	// }
 	// iter.Release()
 	// err = iter.Error()
+}
+
+func StreamToByte(stream io.Reader) []byte {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(stream)
+	return buf.Bytes()
+}
+
+func StreamToString(stream io.Reader) string {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(stream)
+	return buf.String()
+}
+
+func GenerateRandomString(n int) (string, error) {
+	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
+	ret := make([]byte, n)
+	for i := 0; i < n; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		if err != nil {
+			return "", err
+		}
+		ret[i] = letters[num.Int64()]
+	}
+
+	return string(ret), nil
+}
+
+func encode(publicKey *ecdsa.PublicKey) []byte {
+	encodedByte, _ := x509.MarshalPKIXPublicKey(publicKey)
+	return encodedByte
+}
+
+func decode(encodedPub []byte) *ecdsa.PublicKey {
+	genericPublicKey, _ := x509.ParsePKIXPublicKey(encodedPub)
+	publicKey := genericPublicKey.(*ecdsa.PublicKey)
+
+	return publicKey
 }

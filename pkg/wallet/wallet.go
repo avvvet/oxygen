@@ -19,19 +19,28 @@ type Wallet struct {
 	BlockchainAddress string
 }
 
-type Wo struct {
-	PrivateKey        *ecdsa.PrivateKey
-	PublicKey         *ecdsa.PublicKey
-	BlockchainAddress string
+type OxygenWallet struct {
+	PrivateKey    *ecdsa.PrivateKey
+	PublicKey     *ecdsa.PublicKey
+	OxygenAddress string
 }
 type Signature struct {
 	R *big.Int
 	S *big.Int
 }
 
-func NewWallet() *Wo {
+type RawTx struct {
+	SenderPublicKey       []byte
+	SenderOxygenAddress   string
+	SenderRandomHash      [32]byte
+	ReceiverPublicKey     []byte
+	ReceiverOxygenAddress string
+	Token                 int
+}
+
+func NewWallet() *OxygenWallet {
 	// 1. Creating ECDSA private key (32 bytes) public key (64 bytes)
-	w := &Wo{}
+	w := &OxygenWallet{}
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	w.PrivateKey = privateKey
 	w.PublicKey = &w.PrivateKey.PublicKey
@@ -64,7 +73,7 @@ func NewWallet() *Wo {
 	copy(dc8[21:], chsum[:])
 	// 9. Convert the result from a byte string into base58.
 	address := base58.Encode(dc8)
-	w.BlockchainAddress = address
+	w.OxygenAddress = address
 	return w
 }
 
@@ -87,6 +96,13 @@ func (w *Wallet) PublicKeyStr() string {
 // func (w *Wallet) BlockchainAddress() string {
 // 	return w.blockchainAddress
 // }
+
+func (rtx *RawTx) Sign(pk *ecdsa.PrivateKey) *Signature {
+	m, _ := json.Marshal(rtx)
+	h := sha256.Sum256([]byte(m))
+	r, s, _ := ecdsa.Sign(rand.Reader, pk, h[:])
+	return &Signature{r, s}
+}
 
 func (w *Wallet) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
