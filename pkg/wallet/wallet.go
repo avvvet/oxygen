@@ -20,9 +20,9 @@ type Wallet struct {
 }
 
 type Wo struct {
-	Pk  *ecdsa.PrivateKey
-	Dk  string
-	Sig []byte
+	PrivateKey        *ecdsa.PrivateKey
+	PublicKey         *ecdsa.PublicKey
+	BlockchainAddress string
 }
 type Signature struct {
 	R *big.Int
@@ -31,7 +31,7 @@ type Signature struct {
 
 func NewWallet() *Wallet {
 	// 1. Creating ECDSA private key (32 bytes) public key (64 bytes)
-	w := &Wallet{}
+	w := &Wo{}
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	w.PrivateKey = privateKey
 	w.PublicKey = &w.PrivateKey.PublicKey
