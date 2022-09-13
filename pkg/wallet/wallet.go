@@ -19,6 +19,10 @@ type Wallet struct {
 	BlockchainAddress string
 }
 
+type Wo struct {
+	Pk string
+	Dk string
+}
 type Signature struct {
 	R *big.Int
 	S *big.Int
