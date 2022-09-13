@@ -20,8 +20,9 @@ type Wallet struct {
 }
 
 type Wo struct {
-	Pk string
-	Dk string
+	Pk  string
+	Dk  string
+	Sig []byte
 }
 type Signature struct {
 	R *big.Int
