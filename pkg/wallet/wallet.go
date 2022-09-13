@@ -29,7 +29,7 @@ type Signature struct {
 	S *big.Int
 }
 
-func NewWallet() *Wallet {
+func NewWallet() *Wo {
 	// 1. Creating ECDSA private key (32 bytes) public key (64 bytes)
 	w := &Wo{}
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
