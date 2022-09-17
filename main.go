@@ -40,10 +40,10 @@ func main() {
 
 	natureRawTx := &wallet.RawTx{
 		SenderPublicKey:       senderPK,
-		SenderOxygenAddress:   adamWallet.OxygenAddress,
+		SenderWalletAddress:   adamWallet.WalletAddress,
 		SenderRandomHash:      sha256.Sum256([]byte(randomString)),
 		ReceiverPublicKey:     senderPK,
-		ReceiverOxygenAddress: adamWallet.OxygenAddress,
+		ReceiverWalletAddress: adamWallet.WalletAddress,
 		Token:                 900,
 	}
 
@@ -60,11 +60,11 @@ func main() {
 
 	rawTx1 := &wallet.RawTx{
 		SenderPublicKey:       senderPK,
-		SenderOxygenAddress:   adamWallet.OxygenAddress,
+		SenderWalletAddress:   adamWallet.WalletAddress,
 		SenderRandomHash:      sha256.Sum256([]byte(randomString)),
 		Token:                 400,
 		ReceiverPublicKey:     receiverPK,
-		ReceiverOxygenAddress: eveWallet.OxygenAddress,
+		ReceiverWalletAddress: eveWallet.WalletAddress,
 	}
 
 	txout1 := &blockchain.TxOutput{
@@ -76,11 +76,11 @@ func main() {
 
 	rawTx2 := &wallet.RawTx{
 		SenderPublicKey:       senderPK,
-		SenderOxygenAddress:   adamWallet.OxygenAddress,
+		SenderWalletAddress:   adamWallet.WalletAddress,
 		SenderRandomHash:      sha256.Sum256([]byte(randomString)),
 		Token:                 490,
 		ReceiverPublicKey:     receiverPK,
-		ReceiverOxygenAddress: eveWallet.OxygenAddress,
+		ReceiverWalletAddress: eveWallet.WalletAddress,
 	}
 
 	txout2 := &blockchain.TxOutput{

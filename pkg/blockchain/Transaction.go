@@ -42,13 +42,13 @@ type Signature struct {
 
 func NatureTx(txOutput *TxOutput, data string) *Transaction {
 	// if data == "" {
-	// 	data = fmt.Sprintf("Nature Token to %s", txOutput.RawTx.ReceiverOxygenAddress)
+	// 	data = fmt.Sprintf("Nature Token to %s", txOutput.RawTx.ReceiverWalletAddress)
 	// }
 
 	txinput := TxInput{[]byte{}, -1}
 
 	txOutput.Token = txOutput.RawTx.Token
-	txOutput.TokenOwner = txOutput.RawTx.ReceiverOxygenAddress
+	txOutput.TokenOwner = txOutput.RawTx.ReceiverWalletAddress
 	tx := Transaction{nil, []TxInput{txinput}, []TxOutput{*txOutput}}
 	tx.GenTxId()
 	return &tx
@@ -76,7 +76,7 @@ func (out *TxOutput) IsTokenOwner(tokenOwner string) bool {
 
 	// 2 check if TokenOwner is equal to rawTx receiver or sender address
 
-	if out.VerifyRawTxSignature() && (out.TokenOwner == out.RawTx.ReceiverOxygenAddress || out.TokenOwner == out.RawTx.SenderOxygenAddress) && tokenOwner == out.TokenOwner {
+	if out.VerifyRawTxSignature() && (out.TokenOwner == out.RawTx.ReceiverWalletAddress || out.TokenOwner == out.RawTx.SenderWalletAddress) && tokenOwner == out.TokenOwner {
 		return true
 	}
 
@@ -94,7 +94,7 @@ func (c *Chain) NewTransaction(txout *TxOutput) *Transaction {
 		return nil
 	}
 
-	utxo, total_utxo := c.GetUTXO(txout.RawTx.SenderOxygenAddress)
+	utxo, total_utxo := c.GetUTXO(txout.RawTx.SenderWalletAddress)
 
 	/* sort utxo */
 
@@ -124,12 +124,12 @@ func (c *Chain) NewTransaction(txout *TxOutput) *Transaction {
 
 			/* output for receiver */
 			txout.Token = txout.RawTx.Token
-			txout.TokenOwner = txout.RawTx.ReceiverOxygenAddress
+			txout.TokenOwner = txout.RawTx.ReceiverWalletAddress
 			outputs = append(outputs, *txout)
 
 			/*change for sender*/
 			txout.Token = enough_utxo - txout.RawTx.Token
-			txout.TokenOwner = txout.RawTx.SenderOxygenAddress
+			txout.TokenOwner = txout.RawTx.SenderWalletAddress
 			outputs = append(outputs, *txout)
 
 			break

@@ -13,16 +13,10 @@ import (
 	"golang.org/x/crypto/ripemd160"
 )
 
-type Wallet struct {
-	PrivateKey        *ecdsa.PrivateKey
-	PublicKey         *ecdsa.PublicKey
-	BlockchainAddress string
-}
-
-type OxygenWallet struct {
+type WalletAddress struct {
 	PrivateKey    *ecdsa.PrivateKey
 	PublicKey     *ecdsa.PublicKey
-	OxygenAddress string
+	WalletAddress string
 }
 type Signature struct {
 	R *big.Int
@@ -31,16 +25,16 @@ type Signature struct {
 
 type RawTx struct {
 	SenderPublicKey       []byte
-	SenderOxygenAddress   string
+	SenderWalletAddress   string
 	SenderRandomHash      [32]byte
 	ReceiverPublicKey     []byte
-	ReceiverOxygenAddress string
+	ReceiverWalletAddress string
 	Token                 int
 }
 
-func NewWallet() *OxygenWallet {
+func NewWallet() *WalletAddress {
 	// 1. Creating ECDSA private key (32 bytes) public key (64 bytes)
-	w := &OxygenWallet{}
+	w := &WalletAddress{}
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	w.PrivateKey = privateKey
 	w.PublicKey = &w.PrivateKey.PublicKey
@@ -73,27 +67,27 @@ func NewWallet() *OxygenWallet {
 	copy(dc8[21:], chsum[:])
 	// 9. Convert the result from a byte string into base58.
 	address := base58.Encode(dc8)
-	w.OxygenAddress = address
+	w.WalletAddress = address
 	return w
 }
 
-// func (w *Wallet) PrivateKey() *ecdsa.PrivateKey {
+// func (w *WalletAddress) PrivateKey() *ecdsa.PrivateKey {
 // 	return w.privateKey
 // }
 
-func (w *Wallet) PrivateKeyStr() string {
+func (w *WalletAddress) PrivateKeyStr() string {
 	return fmt.Sprintf("%x", w.PrivateKey.D.Bytes())
 }
 
-// func (w *Wallet) PublicKey() *ecdsa.PublicKey {
+// func (w *WalletAddress) PublicKey() *ecdsa.PublicKey {
 // 	return w.publicKey
 // }
 
-func (w *Wallet) PublicKeyStr() string {
+func (w *WalletAddress) PublicKeyStr() string {
 	return fmt.Sprintf("%064x%064x", w.PublicKey.X.Bytes(), w.PublicKey.Y.Bytes())
 }
 
-// func (w *Wallet) BlockchainAddress() string {
+// func (w *WalletAddress) BlockchainAddress() string {
 // 	return w.blockchainAddress
 // }
 
@@ -104,65 +98,15 @@ func (rtx *RawTx) Sign(pk *ecdsa.PrivateKey) *Signature {
 	return &Signature{r, s}
 }
 
-func (w *Wallet) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		PrivateKey        string `json:"private_key"`
-		PublicKey         string `json:"public_key"`
-		BlockchainAddress string `json:"blockchain_address"`
-	}{
-		PrivateKey:        w.PrivateKeyStr(),
-		PublicKey:         w.PublicKeyStr(),
-		BlockchainAddress: w.BlockchainAddress,
-	})
-}
-
 type Transaction struct {
-	senderPrivateKey           *ecdsa.PrivateKey
-	senderPublicKey            *ecdsa.PublicKey
-	senderBlockchainAddress    string
-	recipientBlockchainAddress string
-	value                      float32
+	senderPrivateKey       *ecdsa.PrivateKey
+	senderPublicKey        *ecdsa.PublicKey
+	senderWalletAddress    string
+	recipientWalletAddress string
+	value                  float32
 }
 
 func NewTransaction(privateKey *ecdsa.PrivateKey, publicKey *ecdsa.PublicKey,
 	sender string, recipient string, value float32) *Transaction {
 	return &Transaction{privateKey, publicKey, sender, recipient, value}
-}
-
-func (t *Transaction) GenerateSignature() *Signature {
-	m, _ := json.Marshal(t)
-	h := sha256.Sum256([]byte(m))
-	r, s, _ := ecdsa.Sign(rand.Reader, t.senderPrivateKey, h[:])
-	return &Signature{r, s}
-}
-
-func (t *Transaction) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		Sender    string  `json:"sender_blockchain_address"`
-		Recipient string  `json:"recipient_blockchain_address"`
-		Value     float32 `json:"value"`
-	}{
-		Sender:    t.senderBlockchainAddress,
-		Recipient: t.recipientBlockchainAddress,
-		Value:     t.value,
-	})
-}
-
-type TransactionRequest struct {
-	SenderPrivateKey           *string `json:"sender_private_key"`
-	SenderBlockchainAddress    *string `json:"sender_blockchain_address"`
-	RecipientBlockchainAddress *string `json:"recipient_blockchain_address"`
-	SenderPublicKey            *string `json:"sender_public_key"`
-	Value                      *string `json:"value"`
-}
-
-func (tr *TransactionRequest) Validate() bool {
-	if tr.SenderPrivateKey == nil ||
-		tr.SenderBlockchainAddress == nil ||
-		tr.RecipientBlockchainAddress == nil ||
-		tr.SenderPublicKey == nil ||
-		tr.Value == nil {
-		return false
-	}
-	return true
 }
