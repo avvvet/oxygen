@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const Difficulty int = 6
+const Difficulty int = 3
 
 type ProofOfWork struct {
 	Block *Block
