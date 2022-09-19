@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/avvvet/oxygen/pkg/util"
 	"github.com/btcsuite/btcutil/base58"
 	"golang.org/x/crypto/ripemd160"
 )
@@ -16,6 +17,12 @@ import (
 type WalletAddress struct {
 	PrivateKey    *ecdsa.PrivateKey
 	PublicKey     *ecdsa.PublicKey
+	WalletAddress string
+}
+
+type WalletAddressByte struct {
+	PrivateKey    []byte
+	PublicKey     []byte
 	WalletAddress string
 }
 type Signature struct {
@@ -82,6 +89,14 @@ func (w *WalletAddress) PrivateKeyStr() string {
 // func (w *WalletAddress) PublicKey() *ecdsa.PublicKey {
 // 	return w.publicKey
 // }
+
+func (w *WalletAddress) EncodeWallet() *WalletAddressByte {
+	return &WalletAddressByte{
+		PrivateKey:    util.EncodePrivateKey(w.PrivateKey),
+		PublicKey:     util.EncodePublicKey(w.PublicKey),
+		WalletAddress: w.WalletAddress,
+	}
+}
 
 func (w *WalletAddress) PublicKeyStr() string {
 	return fmt.Sprintf("%064x%064x", w.PublicKey.X.Bytes(), w.PublicKey.Y.Bytes())

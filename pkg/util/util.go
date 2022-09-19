@@ -35,12 +35,22 @@ func GenerateRandomString(n int) (string, error) {
 	return string(ret), nil
 }
 
-func Encode(publicKey *ecdsa.PublicKey) []byte {
+func EncodePrivateKey(privateKey *ecdsa.PrivateKey) []byte {
+	encodedByte, _ := x509.MarshalECPrivateKey(privateKey)
+	return encodedByte
+}
+
+func DecodePrivateKey(encodedPrivate []byte) *ecdsa.PrivateKey {
+	privateKey, _ := x509.ParseECPrivateKey(encodedPrivate) //x509
+	return privateKey
+}
+
+func EncodePublicKey(publicKey *ecdsa.PublicKey) []byte {
 	encodedByte, _ := x509.MarshalPKIXPublicKey(publicKey)
 	return encodedByte
 }
 
-func Decode(encodedPub []byte) *ecdsa.PublicKey {
+func DecodePublicKey(encodedPub []byte) *ecdsa.PublicKey {
 	genericPublicKey, _ := x509.ParsePKIXPublicKey(encodedPub)
 	publicKey := genericPublicKey.(*ecdsa.PublicKey)
 
