@@ -3,11 +3,12 @@ package blockchain
 import (
 	"crypto/ecdsa"
 	"crypto/sha256"
-	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"math/big"
 	"sort"
 
+	"github.com/avvvet/oxygen/pkg/util"
 	"github.com/avvvet/oxygen/pkg/wallet"
 )
 
@@ -85,13 +86,13 @@ func (out *TxOutput) IsTokenOwner(tokenOwner string) bool {
 	return false
 }
 
-func (c *Chain) NewTransaction(txout *TxOutput) *Transaction {
+func (c *Chain) NewTransaction(txout *TxOutput) (*Transaction, error) {
 	var inputs []TxInput
 	var outputs []TxOutput
 
 	/* verify rawTx signature is valid */
 	if !txout.VerifyRawTxSignature() {
-		return nil
+		return nil, errors.New("error: invalid signature")
 	}
 
 	utxo, total_utxo := c.GetUTXO(txout.RawTx.SenderWalletAddress)
@@ -103,8 +104,7 @@ func (c *Chain) NewTransaction(txout *TxOutput) *Transaction {
 	})
 
 	if total_utxo < txout.RawTx.Token {
-		logger.Sugar().Info("Error: not enought funds")
-		return nil
+		return nil, errors.New("error: not enough funds")
 	}
 
 	/*
@@ -142,7 +142,7 @@ func (c *Chain) NewTransaction(txout *TxOutput) *Transaction {
 	tx := Transaction{nil, inputs, outputs}
 	tx.GenTxId()
 
-	return &tx
+	return &tx, nil
 }
 
 func (tx *Transaction) HashTx() [32]byte {
@@ -158,15 +158,8 @@ func (out *TxOutput) VerifyRawTxSignature() bool {
 	rawtx, _ := json.Marshal(out.RawTx)
 	h := sha256.Sum256([]byte(rawtx))
 
-	SenderPK := Decode(out.RawTx.SenderPublicKey)
+	SenderPK := util.DecodePublicKey(out.RawTx.SenderPublicKey)
 	flag := ecdsa.Verify(SenderPK, h[:], out.Signature.R, out.Signature.S)
 
 	return flag
-}
-
-func Decode(encodedPub []byte) *ecdsa.PublicKey {
-	genericPublicKey, _ := x509.ParsePKIXPublicKey(encodedPub)
-	publicKey := genericPublicKey.(*ecdsa.PublicKey)
-
-	return publicKey
 }
