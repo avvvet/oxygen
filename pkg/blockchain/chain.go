@@ -3,7 +3,6 @@ package blockchain
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"github.com/avvvet/oxygen/pkg/kv"
@@ -51,20 +50,22 @@ func InitChain(txOutput *TxOutput) (*Chain, error) {
 	return &Chain{ledger, lastblock}, err
 }
 
-func (c *Chain) ChainBlock(data string, txs []*Transaction) {
+func (c *Chain) ChainBlock(data string, txs []*Transaction) (*Block, error) {
 	lastBlock := c.LastBlock
 	newblock, err := CreateBlock(data, txs, lastBlock.Hash)
 	newblock.BlockHeight = lastBlock.BlockHeight + 1
 	if err != nil {
-		fmt.Print(err)
-	} else {
-		b, _ := json.Marshal(newblock)
-		err = c.Ledger.Upsert([]byte(strconv.Itoa(newblock.BlockHeight)), b)
-		if err != nil {
-			logger.Sugar().Fatal("unable to store data")
-		}
-		c.LastBlock = newblock
+		return nil, err
 	}
+
+	b, _ := json.Marshal(newblock)
+	err = c.Ledger.Upsert([]byte(strconv.Itoa(newblock.BlockHeight)), b)
+	if err != nil {
+		return nil, err
+	}
+	c.LastBlock = newblock
+
+	return newblock, nil
 }
 
 func (c *Chain) GetUTXO(address string) ([]UTXO, int) {
