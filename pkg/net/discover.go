@@ -2,11 +2,9 @@ package net
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/peer"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/network"
@@ -34,25 +32,19 @@ func Discover(ctx context.Context, h host.Host, dht *dht.IpfsDHT, rendezvous str
 				log.Fatal(err)
 			}
 
-			for i, p := range peers {
+			for _, p := range peers {
 				if p.ID == h.ID() {
 					continue
 				}
 				if h.Network().Connectedness(p.ID) != network.Connected {
 					_, err = h.Network().DialPeer(ctx, p.ID)
-					fmt.Printf("Connected to peer %s\n", p.ID.Pretty())
+					//fmt.Printf("Connected to peer %s\n", p.ID.Pretty())
 
 					if err != nil {
-						peers = removePeer(peers, i)
 						continue
 					}
 				}
 			}
 		}
 	}
-}
-
-func removePeer(p []peer.AddrInfo, i int) []peer.AddrInfo {
-	p[i] = p[len(p)-1]
-	return p[:len(p)-1]
 }
