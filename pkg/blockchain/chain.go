@@ -18,45 +18,79 @@ type Chain struct {
 	LastBlock *Block
 }
 
-func InitChain(txOutput *TxOutput) (*Chain, error) {
-	ledger, err := kv.NewLedger("./ledger/store")
+func InitChainLedger(path string) (*Chain, error) {
+	ledger, err := kv.NewLedger(path)
 	if err != nil {
-		logger.Sugar().Fatal("unable to initialize ledger.")
-	}
-
-	iter := ledger.Db.NewIterator(nil, nil)
-	if !iter.Last() {
-		tx := NatureTx(txOutput, "genesis nature token")
-		block, err := Genesis(tx)
-		if err != nil {
-			logger.Sugar().Fatal("unable to create genesis block.")
-		}
-		b, _ := json.Marshal(block)
-
-		err = ledger.Upsert([]byte(strconv.Itoa(block.BlockHeight)), b)
-		if err != nil {
-			logger.Sugar().Fatal("unable to store data")
-		}
-		iter.Release()
-		return &Chain{ledger, block}, err
-	}
-
-	lastblock := &Block{}
-	err = json.Unmarshal(iter.Value(), lastblock)
-	if err != nil {
-		logger.Sugar().Fatal("unable to get block from store")
-	}
-	iter.Release()
-	return &Chain{ledger, lastblock}, err
-}
-
-func (c *Chain) ChainBlock(data string, txs []*Transaction) (*Block, error) {
-	lastBlock := c.LastBlock
-	newblock, err := CreateBlock(data, txs, lastBlock.Hash)
-	newblock.BlockHeight = lastBlock.BlockHeight + 1
-	if err != nil {
+		logger.Sugar().Warn("unable to initialize chain ledger.")
 		return nil, err
 	}
+	return &Chain{ledger, &Block{BlockHeight: -1}}, err
+}
+
+/* checks if any block exists */
+func (c *Chain) IsGenesisTx() bool {
+	iter := c.Ledger.Db.NewIterator(nil, nil)
+
+	return !iter.Last() /*true if record existis */
+}
+
+// func InitChain(txOutput *TxOutput) (*Chain, error) {
+// 	ledger, err := kv.NewLedger("./ledger/store")
+// 	if err != nil {
+// 		logger.Sugar().Fatal("unable to initialize ledger.")
+// 	}
+
+// 	iter := ledger.Db.NewIterator(nil, nil)
+// 	if !iter.Last() {
+// 		tx := NatureTx(txOutput, "genesis nature token")
+// 		block, err := Genesis(tx)
+// 		if err != nil {
+// 			logger.Sugar().Fatal("unable to create genesis block.")
+// 		}
+// 		b, _ := json.Marshal(block)
+
+// 		err = ledger.Upsert([]byte(strconv.Itoa(block.BlockHeight)), b)
+// 		if err != nil {
+// 			logger.Sugar().Fatal("unable to store data")
+// 		}
+// 		iter.Release()
+// 		return &Chain{ledger, block}, err
+// 	}
+
+// 	lastblock := &Block{}
+// 	err = json.Unmarshal(iter.Value(), lastblock)
+// 	if err != nil {
+// 		logger.Sugar().Fatal("unable to get block from store")
+// 	}
+// 	iter.Release()
+// 	return &Chain{ledger, lastblock}, err
+// }
+
+func (c *Chain) ChainBlock(data string, txs []*Transaction) (*Block, error) {
+	if c.LastBlock.BlockHeight != -1 {
+		lastBlock := c.LastBlock
+		newblock, err := CreateBlock(data, txs, lastBlock.Hash)
+		newblock.BlockHeight = lastBlock.BlockHeight + 1
+		if err != nil {
+			return nil, err
+		}
+
+		b, _ := json.Marshal(newblock)
+		err = c.Ledger.Upsert([]byte(strconv.Itoa(newblock.BlockHeight)), b)
+		if err != nil {
+			return nil, err
+		}
+		c.LastBlock = newblock
+
+		return newblock, nil
+	}
+
+	newblock, err := Genesis(txs)
+	if err != nil {
+		logger.Sugar().Warn("unable to create genesis block.")
+		return nil, err
+	}
+	newblock.BlockHeight = c.LastBlock.BlockHeight + 1
 
 	b, _ := json.Marshal(newblock)
 	err = c.Ledger.Upsert([]byte(strconv.Itoa(newblock.BlockHeight)), b)

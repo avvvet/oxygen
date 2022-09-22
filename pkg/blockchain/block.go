@@ -56,7 +56,7 @@ func (b *Block) IsBlockValid(nonce int) bool {
 	return hashString[:Difficulty] == zeros
 }
 
-func Genesis(tx *Transaction) (*Block, error) {
-	block, err := CreateBlock("genesis adam's block ", []*Transaction{tx}, [32]byte{})
+func Genesis(tx []*Transaction) (*Block, error) {
+	block, err := CreateBlock("genesis adam's block ", tx, [32]byte{})
 	return block, err
 }

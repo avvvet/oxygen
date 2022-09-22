@@ -41,11 +41,7 @@ type Signature struct {
 	S *big.Int
 }
 
-func NatureTx(txOutput *TxOutput, data string) *Transaction {
-	// if data == "" {
-	// 	data = fmt.Sprintf("Nature Token to %s", txOutput.RawTx.ReceiverWalletAddress)
-	// }
-
+func GenesisTx(txOutput *TxOutput) *Transaction {
 	txinput := TxInput{[]byte{}, -1}
 
 	txOutput.Token = txOutput.RawTx.Token
@@ -90,6 +86,15 @@ func (c *Chain) NewTransaction(txout *TxOutput) (*Transaction, error) {
 	var inputs []TxInput
 	var outputs []TxOutput
 
+	/*
+	   is this genesis transaction
+	   if existing block height is zero and node is sync with the network
+	*/
+	if c.IsGenesisTx() {
+		tx := GenesisTx(txout) //create genesis transaction
+		return tx, nil
+	}
+
 	/* verify rawTx signature is valid */
 	if !txout.VerifyRawTxSignature() {
 		return nil, errors.New("error: invalid signature")
@@ -104,7 +109,7 @@ func (c *Chain) NewTransaction(txout *TxOutput) (*Transaction, error) {
 	})
 
 	if total_utxo < txout.RawTx.Token {
-		return nil, errors.New("error: not enough funds")
+		return nil, errors.New("wallet address: " + txout.RawTx.SenderWalletAddress + " does not have enough funds")
 	}
 
 	/*

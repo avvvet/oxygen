@@ -19,7 +19,8 @@ import (
 )
 
 var (
-	logger, _ = zap.NewDevelopment()
+	ledger_path = "./ledger/chain"
+	logger, _   = zap.NewDevelopment()
 )
 
 func main() {
@@ -38,23 +39,9 @@ func main() {
 	senderPK := encode(adamWallet.PublicKey)
 	receiverPK := encode(eveWallet.PublicKey)
 
-	natureRawTx := &wallet.RawTx{
-		SenderPublicKey:       senderPK,
-		SenderWalletAddress:   adamWallet.WalletAddress,
-		SenderRandomHash:      sha256.Sum256([]byte(randomString)),
-		ReceiverPublicKey:     senderPK,
-		ReceiverWalletAddress: adamWallet.WalletAddress,
-		Token:                 900,
-	}
-
-	txout := &blockchain.TxOutput{
-		RawTx:     natureRawTx,
-		Signature: natureRawTx.Sign(adamWallet.PrivateKey),
-	}
-
-	chain, err := blockchain.InitChain(txout)
+	chain, err := blockchain.InitChainLedger(ledger_path)
 	if err != nil {
-		fmt.Print(err)
+		logger.Sugar().Warn(err.Error())
 	}
 	defer chain.Ledger.Db.Close()
 
@@ -71,31 +58,11 @@ func main() {
 		RawTx:     rawTx1,
 		Signature: rawTx1.Sign(adamWallet.PrivateKey),
 	}
-	tx1 := chain.NewTransaction(txout1)
+	tx1, err := chain.NewTransaction(txout1)
+	if err != nil {
+		logger.Sugar().Warn(err)
+	}
 	chain.ChainBlock(`data {} `+strconv.Itoa(1), []*blockchain.Transaction{tx1})
-
-	rawTx2 := &wallet.RawTx{
-		SenderPublicKey:       senderPK,
-		SenderWalletAddress:   adamWallet.WalletAddress,
-		SenderRandomHash:      sha256.Sum256([]byte(randomString)),
-		Token:                 490,
-		ReceiverPublicKey:     receiverPK,
-		ReceiverWalletAddress: eveWallet.WalletAddress,
-	}
-
-	txout2 := &blockchain.TxOutput{
-		RawTx:     rawTx2,
-		Signature: rawTx2.Sign(adamWallet.PrivateKey),
-	}
-	tx2 := chain.NewTransaction(txout2)
-	chain.ChainBlock(`data {} `+strconv.Itoa(1), []*blockchain.Transaction{tx2})
-
-	// tx3 := chain.NewTransaction("GREEN", "BLUE", 550)
-	// chain.ChainBlock(`data {} `+strconv.Itoa(2), []*blockchain.Transaction{tx3})
-
-	// for i := 1; i < 10; i++ {
-	// 	chain.ChainBlock(`data {} `+strconv.Itoa(i), []*blockchain.Transaction{tx})
-	// }
 
 	var i = 0
 	for {
