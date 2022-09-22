@@ -40,6 +40,8 @@ func Discover(ctx context.Context, h host.Host, dht *dht.IpfsDHT, rendezvous str
 				if h.Network().Connectedness(p.ID) != network.Connected {
 					_, err = h.Network().DialPeer(ctx, p.ID)
 					fmt.Printf("Connected to peer %s\n", p.ID.Pretty())
+					//h.Peerstore().ClearAddrs(p.ID)
+					h.Network().Peerstore().ClearAddrs(p.ID)
 					if err != nil {
 						continue
 					}
